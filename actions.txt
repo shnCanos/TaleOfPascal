@@ -89,7 +89,6 @@ func print_stdout
 // --- BRAINFUCK INTERPRETER ---
 func interpret
 	set stdout = ""
-	// set list_digits = "1"
 	set list = "0"
 	set number_of_indexes = 1
 	set list_index = 0
@@ -111,7 +110,9 @@ func ininterpret
 
 	if $cur == "+"
 		set itr = $list_index
+		print "read BEGIN"
 		call read_index
+		print "read END"
 		set read = $read + 1
 		set itw = $list_index
 		set ntw = $read
@@ -198,16 +199,25 @@ func read_index
 	set viewed = 0
 	set temp_n = 0
 	set read = ""
-	set length = 0
+	set length = len $list
 	set current_letter = ""
 	
 	call inreadindex
-	set read = read as int
+	// set read = read as int
 func inreadindex
-	set length = len $list
-
 	if $temp_n < $length
 		set current_letter = $list at $temp_n
+
+		// Debug
+		print "Current letter: "
+		print $current_letter
+		print "Length: "
+		print $length
+		print "temp_n: "
+		print $temp_n
+		print "list: "
+		print $list
+
 		if $viewed == $itr
 			if $current_letter != ";"
 				set read += $current_letter
@@ -216,8 +226,11 @@ func inreadindex
 		else
 			if $current_letter == ";"
 				set viewed += 1
+
+		set temp_n += 1
+
 		call inreadindex
-			
+
 
 // --- START PROGRAM ---
 
