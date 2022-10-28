@@ -89,7 +89,7 @@ func print_stdout
 // --- BRAINFUCK INTERPRETER ---
 func interpret
 	set stdout = ""
-	set list = "0"
+	set list = "0" as string
 	set number_of_indexes = 1
 	set list_index = 0
 	
@@ -103,21 +103,22 @@ func ininterpret
 			set list_index -= 1
 	
 	if $cur == ">"
-		if $list_index >= $number_of_indexes
-			set list += ";0"
-			set number_of_indexes += 1
 		set list_index += 1
+		if $list_index >= $number_of_indexes
+			set list += ";0" as string
+			set number_of_indexes += 1
 
 	if $cur == "+"
 		set itr = $list_index
 		print "read BEGIN"
 		call read_index
+		print "Value read: " $read
 		print "read END"
 		set read = $read + 1
 		set itw = $list_index
 		set ntw = $read
 		call write_index
-		set stdout += $list at 0
+		set stdout += $list
 		
 	if $cur == "-"
 		set itr = $list_index
@@ -127,6 +128,10 @@ func ininterpret
 		set ntw = $read
 		call write_index
 
+	set prog_len = len $program
+	set prog_index += 1
+	if $prog_len > $prog_index
+		call ininterpret
 
 // Must define itw (index to write) and ntw (number to write)
 // Will not return anything
@@ -149,28 +154,28 @@ func inwriteindex
 		if $viewed == $itw
 			if $frozen_index == -1
 				set frozen_index = $viewed
-			if $ntwlength > ntwindex
+			if $ntwlength > $ntwindex
 				set temp_list += $ntw at $ntwindex
 				set ntwindex += 1
 			else
 				set temp_list += ";"
-
-		elif has_reajusted_fi == 0
-			if frozen_index != -1
+		elif $has_reajusted_fi == 0
+			if $frozen_index != -1
 				set ctf = ";"
 				set ci = $frozen_index
 				set gnstr = $list
 				call get_next
 				set temp_n = $next
-				has_reajusted_fi = 1
+				set has_reajusted_fi = 1
+				
 				if $current_letter == ";"
 					set viewed += 1
-					temp_list += $current_letter
+					set temp_list += $current_letter
 		else
 			if $current_letter == ";"
 				set viewed += 1
-			temp_list += $current_letter
-		 
+			set temp_list += $current_letter
+		set temp_n += 1
 		call inwriteindex
 
 	set list = $temp_list
@@ -182,7 +187,7 @@ func get_next
 	set next = 0
 	call ingetnext
 func ingetnext
-	set gnindex = ci + next
+	set gnindex = $ci + $next
 	set gnchar = $gnstr at $gnindex
 
 	if $gnchar == $ctf
@@ -200,23 +205,13 @@ func read_index
 	set temp_n = 0
 	set read = ""
 	set length = len $list
-	set current_letter = ""
+	set current_letter = "" as string
 	
 	call inreadindex
 	// set read = read as int
 func inreadindex
 	if $temp_n < $length
 		set current_letter = $list at $temp_n
-
-		// Debug
-		print "Current letter: "
-		print $current_letter
-		print "Length: "
-		print $length
-		print "temp_n: "
-		print $temp_n
-		print "list: "
-		print $list
 
 		if $viewed == $itr
 			if $current_letter != ";"
@@ -228,6 +223,16 @@ func inreadindex
 				set viewed += 1
 
 		set temp_n += 1
+
+		// Debug
+		print "Current letter: " $current_letter
+		print "Length: " $length
+		print "temp_n: " $temp_n
+		print "list: " $list
+		print "read: " $read
+		print "viewed: " $viewed
+		print "Index to read: " $itr
+		print
 
 		call inreadindex
 
