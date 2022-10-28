@@ -82,7 +82,7 @@ func print_stdout
 	
 	set length = len $stdout
 	if $ppvar < $length
-		call print_program
+		call print_stdout
 	else
 		set ppvar = 0
 
@@ -109,24 +109,50 @@ func ininterpret
 			set number_of_indexes += 1
 
 	if $cur == "+"
+		print "->->->->-> INCREMENTING"
+		print "--- read BEGIN ---"
 		set itr = $list_index
-		print "read BEGIN"
 		call read_index
 		print "Value read: " $read
-		print "read END"
+		print "--- read END ---"
+		print
+
 		set read = $read + 1
+
+		print "--- write BEGIN ---"
 		set itw = $list_index
 		set ntw = $read
 		call write_index
-		set stdout += $list
+		print "--- write END ---"
+
+		print
+		print "->->->->-> INCREMENTATION FINISHED"
+		print "Resulting list: " $list
+
+		set stdout = $list
 		
 	if $cur == "-"
+		print "->->->->-> DECREMENTING"
+		print "--- read BEGIN ---"
 		set itr = $list_index
 		call read_index
+		print "Value read: " $read
+		print "--- read END ---"
+		print
+
 		set read = $read - 1
+
+		print "--- write BEGIN ---"
 		set itw = $list_index
 		set ntw = $read
 		call write_index
+		print "--- write END ---"
+
+		print
+		print "->->->->-> DECREMENTATION FINISHED"
+		print "Resulting list: " $list
+
+		set stdout = $list
 
 	set prog_len = len $program
 	set prog_index += 1
@@ -143,22 +169,26 @@ func write_index
 	set viewed = 0
 	set temp_n = 0
 	set current_letter = ""
-	set length = 0
+	set length = len $list
 	set frozen_index = -1
 	set has_reajusted_fi = 0 // Bool - 1=true/0=false
 	call inwriteindex
 func inwriteindex
-	set length = len $list
+	set current_letter = $list at $temp_n
 
 	if $temp_n < $length
 		if $viewed == $itw
 			if $frozen_index == -1
 				set frozen_index = $viewed
+				print "- frozen_index: " $frozen_index
+
 			if $ntwlength > $ntwindex
 				set temp_list += $ntw at $ntwindex
 				set ntwindex += 1
+				print "- Added index " $ntwindex " of " $ntw
 			else
 				set temp_list += ";"
+				set viewed += 1
 		elif $has_reajusted_fi == 0
 			if $frozen_index != -1
 				set ctf = ";"
@@ -175,7 +205,21 @@ func inwriteindex
 			if $current_letter == ";"
 				set viewed += 1
 			set temp_list += $current_letter
+
 		set temp_n += 1
+
+		// Debug
+		print "Current letter: " $current_letter
+		print "temp_list: " $temp_list
+		print "ntw: " $ntw
+		print "ntwindex: " $ntwindex
+		print "ntwlength: " $ntwlength
+		print "viewed: " $viewed
+		print "temp_n: " $temp_n
+		print "length: " $length
+		print "frozen_index: " $frozen_index
+		print "has_reajusted_fi: " $has_reajusted_fi
+		print
 		call inwriteindex
 
 	set list = $temp_list
@@ -208,7 +252,7 @@ func read_index
 	set current_letter = "" as string
 	
 	call inreadindex
-	// set read = read as int
+	set read = $read as int
 func inreadindex
 	if $temp_n < $length
 		set current_letter = $list at $temp_n
