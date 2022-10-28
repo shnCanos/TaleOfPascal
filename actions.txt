@@ -1,96 +1,227 @@
-// Counts how many times the plate in the first room has been pressed
-set plate_1_count = 10
+set program = ""
+set ppvar = 0
 
-// Quotes are only necessary when the string contains spaces
-set message = "The four plates must be pressed in the right order..."
-set cursor_x = 0
-set cursor_y = 24
+func print_program
+	set letter = $program at $ppvar
+	set ppvar += 1
 
-set message at 3 = p
-// Example for map tile reading
-set tile_at_some_pos = tile 0 12
-// Example for double pointers
-set plate_1_ptr = "plate_1_count"
+	set_tile $ppvar 16 $letter "-"
+	
+	set length = len $program
+	if $ppvar < $length
+		call print_program
+	else
+		set ppvar = 0
 
-// Counts how many correct plates have been successfully stepped on in the numbers puzzle
-set puzzle_count = 0
+touch 22 5
+	set program += ">"
+	call print_program
 
-// Secret rock >.>
-touch 3 3
-    set_tile 1 1 0 r
+touch 24 5
+	set program += "<"
+	call print_program
 
-// First room plate
-touch 28 6
-    set plate_1_count -= 1
-    
-    print "Plate pressed count = " $plate_1_count
-    if $$plate_1_ptr > 0
-        set_tile 28 5 $plate_1_count _
-    else
-        set_tile 28 5 " " _
-        set_tile 32 6 " " o
-        set_tile 28 6 o P
+touch 26 5
+	set program += "+"
+	call print_program
 
-        call print_message
+touch 28 5
+	set program += "-"
+	call print_program
 
-func reset_plates
-    set puzzle_count = 0
-    set_tile 51 3 1 " "
-    set_tile 67 3 2 " "
-    set_tile 51 8 3 " "
-    set_tile 67 8 4 " "
+touch 30 5
+	set program += "["
+	call print_program
 
-// Plate 4
-touch 67 9
-    if $puzzle_count == 0
-        set_tile 67 8 4 n
-        set puzzle_count += 1
+touch 32 5
+	set program += "]"
+	call print_program
 
-// Plate 2
-touch 67 4
-    if $puzzle_count == 1
-        set_tile 67 3 2 n
-        set puzzle_count += 1
-    elif $puzzle_count < 1
-        call reset_plates
+touch 34 5
+	set program += ","
+	call print_program
 
-// Plate 1
-touch 51 4
-    if $puzzle_count == 2
-        set_tile 51 3 1 n
-        set puzzle_count += 1
-    elif $puzzle_count < 2
-        call reset_plates
 
-// Plate 3
-touch 51 9
-    if $puzzle_count == 3
-        set puzzle_count += 1
-        set_tile 51 8 3 n
-        set_tile 19 12 " " o
-        set_tile 20 12 " " o
-        set_tile 21 12 " " o
-        set_tile 22 12 " " o
-        set_tile 23 12 " " o
-        
-        // Clear the hint message
-        set message = "                                                      "
-        set cursor_x = 0
-        call print_message
-    elif $puzzle_count < 3
-        call reset_plates
+// --- DELETE ---
+touch 41 5
+	call del
+touch 42 5
+	call del
+touch 43 5
+	call del
 
-// Print text contained in "message" to (cursor_x, cursor_y)
-func print_message
-    set letter = $message at $cursor_x
-    if $letter != ""
-        set_tile $cursor_x $cursor_y $letter h
-        set cursor_x += 1
-        set length = len $message
-        call print_message
+func del
+	set length = len $program
 
-// Simple addition loop example
-func loop_add
-    set a += 1
-    if $a < 10
-        call loop_add
+	set ppvar += 1
+	if $ppvar <= $length
+		set_tile $ppvar 16 " " " "
+		call del
+	else
+		set program = ""
+		set ppvar = 0
+
+// --- ENTER ---
+touch 41 7
+	call start_program
+touch 42 7
+	call start_program
+touch 43 7
+	call start_program
+touch 44 7
+	call start_program
+touch 45 7
+	call start_program
+
+// --- PRINT (fake) STDOUT ---
+func print_stdout
+	set letter = $stdout at $ppvar
+	set ppvar += 1
+
+	set_tile $ppvar 16 $letter "-"
+	
+	set length = len $stdout
+	if $ppvar < $length
+		call print_program
+	else
+		set ppvar = 0
+
+// --- BRAINFUCK INTERPRETER ---
+func interpret
+	set stdout = ""
+	// set list_digits = "1"
+	set list = "0"
+	set number_of_indexes = 1
+	set list_index = 0
+	
+	set prog_index = 0
+	call ininterpret
+func ininterpret
+	set cur = $program at $prog_index
+
+	if $cur == "<"
+		if $list_index != 0 // NO IDEA HOW TO DO &&
+			set list_index -= 1
+	
+	if $cur == ">"
+		if $list_index >= $number_of_indexes
+			set list += ";0"
+			set number_of_indexes += 1
+		set list_index += 1
+
+	if $cur == "+"
+		set itr = $list_index
+		call read_index
+		set read = $read + 1
+		set itw = $list_index
+		set ntw = $read
+		call write_index
+		set stdout += $list at 0
+		
+	if $cur == "-"
+		set itr = $list_index
+		call read_index
+		set read = $read - 1
+		set itw = $list_index
+		set ntw = $read
+		call write_index
+
+
+// Must define itw (index to write) and ntw (number to write)
+// Will not return anything
+func write_index
+	set temp_list = ""
+	set ntw = $ntw as string
+	set ntwindex = 0
+	set ntwlength = len $ntw
+	set viewed = 0
+	set temp_n = 0
+	set current_letter = ""
+	set length = 0
+	set frozen_index = -1
+	set has_reajusted_fi = 0 // Bool - 1=true/0=false
+	call inwriteindex
+func inwriteindex
+	set length = len $list
+
+	if $temp_n < $length
+		if $viewed == $itw
+			if $frozen_index == -1
+				set frozen_index = $viewed
+			if $ntwlength > ntwindex
+				set temp_list += $ntw at $ntwindex
+				set ntwindex += 1
+			else
+				set temp_list += ";"
+
+		elif has_reajusted_fi == 0
+			if frozen_index != -1
+				set ctf = ";"
+				set ci = $frozen_index
+				set gnstr = $list
+				call get_next
+				set temp_n = $next
+				has_reajusted_fi = 1
+				if $current_letter == ";"
+					set viewed += 1
+					temp_list += $current_letter
+		else
+			if $current_letter == ";"
+				set viewed += 1
+			temp_list += $current_letter
+		 
+		call inwriteindex
+
+	set list = $temp_list
+		
+
+// Must declare ctf (char to find), ci (current index) and gnstr (get next string)
+// Will return next, the index
+func get_next
+	set next = 0
+	call ingetnext
+func ingetnext
+	set gnindex = ci + next
+	set gnchar = $gnstr at $gnindex
+
+	if $gnchar == $ctf
+		set next += $ci
+	else
+		set next += 1
+		call ingetnext	
+	
+	
+
+// Must define integer itr (index to read)
+// Will return read as the output
+func read_index
+	set viewed = 0
+	set temp_n = 0
+	set read = ""
+	set length = 0
+	set current_letter = ""
+	
+	call inreadindex
+	set read = read as int
+func inreadindex
+	set length = len $list
+
+	if $temp_n < $length
+		set current_letter = $list at $temp_n
+		if $viewed == $itr
+			if $current_letter != ";"
+				set read += $current_letter
+			else
+				set temp_n = $length + 1 // Break
+		else
+			if $current_letter == ";"
+				set viewed += 1
+		call inreadindex
+			
+
+// --- START PROGRAM ---
+
+func start_program
+	call interpret
+	call del
+	call print_stdout

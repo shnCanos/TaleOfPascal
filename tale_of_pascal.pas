@@ -1,7 +1,7 @@
 {$mode objfpc} // directive to be used for defining classes
 
 program tale_of_pascal;
-uses Crt, Math, Classes, SysUtils, Fgl, Windows, Logging, Mapping, Actions;
+uses Crt, Math, Classes, SysUtils, Fgl, Logging, Mapping, Actions;
 
 type Direction = (up, down, left, right);
 
@@ -184,14 +184,14 @@ begin
 end;
 
 procedure InitializeConsole;
-var Coord: TCoord;
-    Rect: TSmallRect;
+{var Coord: TCoord;
+    Rect: TSmallRect;}
 begin
     TextBackground(Black);
     TextColor(White);
     CursorOff;
     ClrScr;
-  
+ { 
     Rect.Left := 1;
     Rect.Top := 1;
     Rect.Right := 100;  // notice horiz scroll bar once the following executes
@@ -199,7 +199,7 @@ begin
     Coord.X := Byte(Rect.Right + 1 - Rect.Left);
     Coord.y := Byte(Rect.Bottom + 1 - Rect.Top);
     SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), Coord);
-    SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), False, Rect);
+    SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), False, Rect);}
 end;
 
 var input : char;
